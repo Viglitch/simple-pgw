@@ -1,13 +1,24 @@
 #pragma once
 
-#include <pdn_connection.h>
+#include "pdn_connection.h"
 
 #include <boost/asio/ip/address.hpp>
 
 #include <memory>
 
+namespace std {
+    template<>
+    struct hash<boost::asio::ip::address_v4> {
+        size_t operator()(const boost::asio::ip::address_v4& addr) const noexcept {
+            return hash<uint32_t>()(addr.to_uint());
+        }
+    };
+}
+
 class control_plane {
 public:
+    control_plane() = default;
+
     std::shared_ptr<pdn_connection> find_pdn_by_cp_teid(uint32_t cp_teid) const;
 
     std::shared_ptr<pdn_connection> find_pdn_by_ip_address(const boost::asio::ip::address_v4 &ip) const;

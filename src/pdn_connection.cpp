@@ -1,4 +1,4 @@
-#include <pdn_connection.h>
+#include "pdn_connection.h"
 
 std::shared_ptr<pdn_connection> pdn_connection::create(uint32_t cp_teid, boost::asio::ip::address_v4 apn_gw,
                                                        boost::asio::ip::address_v4 ue_ip_addr) {
@@ -26,3 +26,14 @@ boost::asio::ip::address_v4 pdn_connection::get_ue_ip_addr() const { return _ue_
 pdn_connection::pdn_connection(uint32_t cp_teid, boost::asio::ip::address_v4 apn_gw,
                                boost::asio::ip::address_v4 ue_ip_addr) :
     _apn_gateway(std::move(apn_gw)), _ue_ip_addr(std::move(ue_ip_addr)), _cp_teid(cp_teid) {}
+
+void pdn_connection::add_bearer(std::shared_ptr<bearer> bearer) {
+    _bearers[bearer->get_dp_teid()] = std::move(bearer);
+}
+
+void pdn_connection::remove_bearer(uint32_t dp_teid) {
+    _bearers.erase(dp_teid);
+    if (_default_bearer && _default_bearer->get_dp_teid() == dp_teid) {
+        _default_bearer.reset();
+    }
+}
